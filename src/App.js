@@ -5,8 +5,6 @@ import { functions } from './utils/firebase.js'
 
 
 function App() {
-  const helloAgain = httpsCallable(functions, 'sendInvitation');
-  helloAgain({}).then((result) => console.log(result)).catch((error) => console.log(error));
   return (
     <div className="App">
       <header className="App-header">

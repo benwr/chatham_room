@@ -1,7 +1,17 @@
 {
-  /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
-    ".read": false,
-    ".write": false
+    "rooms": {
+      "$room_id": {
+        ".read": "auth.token.email_verified === true && data.child('emails').val().contains(',' + auth.token.email + ',')",
+        ".validate": "!data.child('emails').exists() || (data.child('emails').val().contains(',' + auth.token.email + ',') && newData.child('emails').val() === data.child('emails').val())"
+      },
+      ".write": "auth.token.email_verified === true"
+    },
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+      }
+    }
   }
 }
