@@ -1,7 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
+import { httpsCallable } from "firebase/functions";
+import { functions } from './utils/firebase.js'
+
 
 function App() {
+  const helloAgain = httpsCallable(functions, 'helloAgain');
+  helloAgain({}).then((result) => console.log(result)).catch((error) => console.log(error));
   return (
     <div className="App">
       <header className="App-header">
