@@ -37,6 +37,8 @@ class AuthNav extends React.Component {
     } else {
       return (<div id="wrapper">
         <nav><Link to="/login">Log in or sign up</Link></nav>
+        You must be logged in to access this page.
+        <About />
       </div>);
     }
   }
