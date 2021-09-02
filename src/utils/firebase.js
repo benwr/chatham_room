@@ -1,5 +1,7 @@
-import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 import { getFunctions } from "firebase/functions";
 
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -18,4 +20,6 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const functions = getFunctions(app);
+export const auth = getAuth();
+export const db = getDatabase(app, "https://chatham-room-default-rtdb.firebaseio.com/");
 

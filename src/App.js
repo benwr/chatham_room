@@ -1,27 +1,52 @@
-import logo from './logo.svg';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+import React from "react";
+import { CreateRoom } from "./CreateRoom.js";
+import { RoomContainer } from "./Room.js";
+import { LoginContainer } from "./Login.js";
+import { CompleteLoginContainer } from "./CompleteLogin.js";
+import { AuthNav } from "./AuthBox.js";
+import { VisitedList } from "./VisitedList.js";
+import { About } from "./About.js";
 import './App.css';
-import { httpsCallable } from "firebase/functions";
-import { functions } from './utils/firebase.js'
 
+import { auth, db, functions } from "./utils/firebase.js";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/room/:id">
+          <AuthNav auth={auth}>
+            <RoomContainer db={db} auth={auth} />
+          </AuthNav>
+        </Route>
+        <Route path="/about">
+          <AuthNav auth={auth}>
+            <About />
+          </AuthNav>
+        </Route>
+        <Route path="/create_room">
+          <AuthNav auth={auth}>
+            <CreateRoom db={db} auth={auth} functions={functions} />
+          </AuthNav>
+        </Route>
+        <Route path="/login">
+          <LoginContainer auth={auth} />
+        </Route>
+        <Route path="/complete_login">
+          <CompleteLoginContainer auth={auth} />
+        </Route>
+        <Route path="/">
+          <AuthNav auth={auth}>
+            <VisitedList db={db} auth={auth} />
+          </AuthNav>
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 

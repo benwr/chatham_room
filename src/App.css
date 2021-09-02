@@ -1,38 +1,108 @@
-.App {
-  text-align: center;
+div#wrapper {
+  margin: auto;
+  padding: 2em;
+  max-width: 60em;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+nav {
+  text-align: right;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+nav * {
+  margin-left: 1em;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+nav a {
+  text-decoration: none;
+  color: #000
 }
 
-.App-link {
-  color: #61dafb;
+nav a:hover {
+  text-decoration: underline;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.message {
+  padding-left: 0.4em;
+  padding-bottom: 0.2em;
+  padding-top: 0.4em;
+  margin: 0.2em;
+  margin-right: 1px;
+  padding-right: 0;
+  border: 1px solid grey;
+  border-radius: 4px;
+}
+
+a.reply-link {
+  color: #aaa;
+  font-size: 0.6em;
+  text-decoration: none;
+  display: block;
+  margin-left: 0.5em;
+}
+
+div.room {
+  max-width: 60em;
+  margin: auto;
+  padding: 1em;
+}
+
+input.message-input {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+}
+
+div#create-room-form {
+  max-width: 60em;
+  margin: auto;
+  padding: 2em;
+}
+
+div#login-form {
+  max-width: 60em;
+  margin: auto;
+  padding: 2em;
+}
+
+span.email-list {
+  font-family: monospace;
+}
+
+div.visited-list ul {
+  padding: 0.5em;
+  list-style: none;
+}
+
+div.visited-list li {
+  margin-bottom: 0.5em;
+}
+
+div.visited-list a {
+  color: #000;
+}
+
+a.timestamp {
+  float: right;
+  font-size: 0.6em;
+  color: #ccc;
+  text-decoration: none;
+  margin-right: 0.6em;
+}
+
+a.timestamp:hover {
+  color: #000;
+}
+
+div#about {
+  max-width: 40em;
+  margin: auto;
+}
+
+div#about a {
+  color: blue;
+  text-decoration: none;
+}
+
+div#about a:hover {
+  color: blue;
+  text-decoration: underline;
 }
