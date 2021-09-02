@@ -48,7 +48,7 @@ class CreateRoom extends React.Component {
         targets: email_list,
         room_name: this.state.name,
         room_id: new_ref.key
-      }).then(() => {
+      }, this.props.auth).then(() => {
         window.location.href = "/room/" + new_ref.key;
       }).catch((e) => {
         console.log(e);
