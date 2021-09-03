@@ -80,12 +80,17 @@ div.visited-list a {
   color: #000;
 }
 
-a.timestamp {
+div.byline {
   float: right;
   font-size: 0.6em;
-  color: #ccc;
   text-decoration: none;
   margin-right: 0.6em;
+  margin-left: 1em;
+}
+
+div.byline a {
+  color: #ccc;
+  text-decoration: none;
 }
 
 a.timestamp:hover {
