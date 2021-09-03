@@ -81,11 +81,9 @@ div.visited-list a {
 }
 
 div.byline {
-  float: right;
   font-size: 0.6em;
   text-decoration: none;
-  margin-right: 0.6em;
-  margin-left: 1em;
+  padding: 0.2em;
 }
 
 div.byline a {
@@ -113,7 +111,8 @@ div#about a:hover {
 }
 
 img.avatar {
-  height: 0.95em;
+  height: 1em;
+  padding: 0;
   margin: 0;
   margin-right: 0.5em;
 }

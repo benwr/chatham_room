@@ -206,7 +206,9 @@ class Message extends React.Component {
       const dt = new Date(this.props.m.time);
       const date = dt.toDateString();
       const time = dt.toLocaleTimeString();
-      stamp = <a href={"#" + this.props.thread_id} id={this.props.thread_id} className="timestamp">{date + " " + time}</a>;
+      stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} className="timestamp">
+        {"@ " + date + " " + time}
+      </a>);
     } else {
       stamp = <span className="timestamp" />
     }
@@ -215,7 +217,7 @@ class Message extends React.Component {
     if (this.props.m.author) {
       byline = (<div className="byline">
           <img alt={this.props.m.author + " avatar"} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
-          {this.props.m.author} @ {stamp}
+          {this.props.m.author} {stamp}
         </div>);
     } else {
       byline = <div className="byline">{stamp}</div>;
