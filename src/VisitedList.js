@@ -1,5 +1,6 @@
 import { ref, onValue } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
+import { Link } from "react-router-dom";
 import React from "react";
 
 class VisitedList extends React.Component {
@@ -26,7 +27,7 @@ class VisitedList extends React.Component {
 
     if (this.state.visits) {
       for (const [k, v] of Object.entries(this.state.visits)) {
-        links.push(<li key={k}><a href={"/room/" + k} >{v.name}</a> ({v.emails.slice(1, -1)})</li>);
+        links.push(<li key={k}><Link to={"/room/" + k} >{v.name}</Link> ({v.emails.slice(1, -1)})</li>);
       }
     }
     return (
