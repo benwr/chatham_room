@@ -122,10 +122,18 @@ class Room extends React.Component {
       }
     }
 
+    const emails = this.props.room.emails.slice(1, -1).split(",");
+    var display_emails = [];
+    for (const email of emails) {
+      display_emails.push(<img key={email + "avatar"} alt={email + " avatar"} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(email) + "?d=retro"} />);
+      display_emails.push(email);
+      display_emails.push(", ");
+    }
+
     return <div className="room">
         <div className="room-info">
           <h2>{this.props.room.name}</h2>
-          In this room: <span className="email-list">{this.props.room.emails.slice(1, -1)}</span>
+          <div className="email-list">{display_emails.slice(0, -1)}</div>
         </div>
         <br />
         <br />

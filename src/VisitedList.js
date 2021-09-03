@@ -27,7 +27,9 @@ class VisitedList extends React.Component {
 
     if (this.state.visits) {
       for (const [k, v] of Object.entries(this.state.visits)) {
-        links.push(<li key={k}><Link to={"/room/" + k} >{v.name}</Link> ({v.emails.slice(1, -1)})</li>);
+        links.push(<li key={k}><Link to={"/room/" + k} >{v.name}</Link> (
+            {v.emails.slice(1, -1).split(",").join(", ")})
+          </li>);
       }
     }
     return (

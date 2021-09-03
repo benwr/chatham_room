@@ -68,7 +68,11 @@ div#login-form {
   padding: 2em;
 }
 
-span.email-list {
+div.email-list {
+  font-size: 0.9em;
+  display: block;
+  white-space: nowrap;
+  overflow: auto;
   font-family: monospace;
 }
 
@@ -127,7 +131,7 @@ div.room-info {
   top: 3em;
   margin: -0.5em;
   background: #eee;
-  padding-top: 0.1em;
+  padding-top: 0;
   padding-bottom: 1em;
   padding-left: 1em;
   border-radius: 1em;
