@@ -1,4 +1,4 @@
-import { push, ref, set, onValue } from "firebase/database";
+import { push, ref, set, onValue, serverTimestamp } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -41,7 +41,7 @@ class Room extends React.Component {
         set(visited_ref, {
           name: this.props.room.name,
           emails: this.props.room.emails,
-          time: (new Date()).toUTCString(),
+          time: serverTimestamp(),
         });
       }
     })
@@ -62,7 +62,7 @@ class Room extends React.Component {
     }
     set(new_ref, {
       content: this.state[thread_id],
-      time: (new Date()).toUTCString(),
+      time: serverTimestamp(),
       children: {}
     });
     var state_update = {[thread_id]: ""};
