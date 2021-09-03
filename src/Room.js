@@ -214,7 +214,7 @@ class Message extends React.Component {
     var byline;
     if (this.props.m.author) {
       byline = (<div className="byline">
-          <img className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=identicon"} />
+          <img alt={this.props.m.author + " avatar"} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
           {this.props.m.author} @ {stamp}
         </div>);
     } else {
