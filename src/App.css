@@ -111,3 +111,9 @@ div#about a:hover {
   color: blue;
   text-decoration: underline;
 }
+
+img.avatar {
+  height: 0.95em;
+  margin: 0;
+  margin-right: 0.5em;
+}

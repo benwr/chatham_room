@@ -2,6 +2,7 @@ import { push, ref, set, onValue, serverTimestamp } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import React from "react";
 import ReactDOM from "react-dom";
+import md5 from "md5";
 import { withRouter } from "react-router-dom";
 
 class RoomContainerRouted extends React.Component {
@@ -212,9 +213,12 @@ class Message extends React.Component {
 
     var byline;
     if (this.props.m.author) {
-      byline = <div className="byline">{this.props.m.author} @ {stamp}</div>
+      byline = (<div className="byline">
+          <img className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=identicon"} />
+          {this.props.m.author} @ {stamp}
+        </div>);
     } else {
-      byline = <div className="byline">{stamp}</div>
+      byline = <div className="byline">{stamp}</div>;
     }
     var reply_content;
     if (this.props.depth < MAX_DEPTH) {
