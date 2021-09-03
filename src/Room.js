@@ -123,8 +123,10 @@ class Room extends React.Component {
     }
 
     return <div className="room">
-        <h2>{this.props.room.name}</h2>
-        In this room: <span className="email-list">{this.props.room.emails.slice(1, -1)}</span>
+        <div className="room-info">
+          <h2>{this.props.room.name}</h2>
+          In this room: <span className="email-list">{this.props.room.emails.slice(1, -1)}</span>
+        </div>
         <br />
         <br />
         {messages}

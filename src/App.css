@@ -6,6 +6,11 @@ div#wrapper {
 
 nav {
   text-align: right;
+  position: sticky;
+  top: 0;
+  padding: 1em;
+  margin: -1em;
+  background: #fff;
 }
 
 nav * {
@@ -115,4 +120,16 @@ img.avatar {
   padding: 0;
   margin: 0;
   margin-right: 0.5em;
+}
+
+div.room-info {
+  position: sticky;
+  top: 3em;
+  margin: -0.5em;
+  background: #eee;
+  padding-top: 0.1em;
+  padding-bottom: 1em;
+  padding-left: 1em;
+  border-radius: 1em;
+  border: 0.5em solid #fff;
 }
