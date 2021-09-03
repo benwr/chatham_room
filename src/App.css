@@ -120,9 +120,11 @@ div#about a:hover {
 }
 
 img.avatar {
-  height: 1em;
+  height: 1.1em;
+  border-radius: 0.2em;
   padding: 0;
   margin: 0;
+  margin-bottom: -0.2em;
   margin-right: 0.5em;
 }
 
