@@ -23,6 +23,8 @@ class RoomContainerRouted extends React.Component {
 
 var RoomContainer = withRouter(RoomContainerRouted);
 
+const MAX_DEPTH=5;
+
 class Room extends React.Component {
   constructor(props) {
     super(props);
@@ -81,6 +83,7 @@ class Room extends React.Component {
         messages.push(
           <Message
             m={v}
+            depth={1}
             key={k}
             thread_id={k}
             replies={this.state}
@@ -178,34 +181,39 @@ class Message extends React.Component {
       stamp = <span className="timestamp" />
     }
     var reply_content;
-    if (this.props.replies[this.props.thread_id] === undefined) {
-      reply_content = React.createElement("a", {
-        href: "#",
-        className: "reply-link",
-        onClick: this.handleClickReply
-      }, "⮑ reply");
+    if (this.props.depth < MAX_DEPTH) {
+      if (this.props.replies[this.props.thread_id] === undefined) {
+        reply_content = React.createElement("a", {
+          href: "#",
+          className: "reply-link",
+          onClick: this.handleClickReply
+        }, "⮑ reply");
+      } else {
+        reply_content = React.createElement(ReplyForm, {
+          handleTyping: this.props.handleTyping,
+          handleSubmit: this.props.handleSubmit,
+          thread_id: this.props.thread_id,
+          content: this.props.replies[this.props.thread_id]
+        });
+      }
     } else {
-      reply_content = React.createElement(ReplyForm, {
-        handleTyping: this.props.handleTyping,
-        handleSubmit: this.props.handleSubmit,
-        thread_id: this.props.thread_id,
-        content: this.props.replies[this.props.thread_id]
-      });
+      reply_content = null;
     }
 
     var replies = [];
 
     if (this.props.m.children) {
       for (const [k, v] of Object.entries(this.props.m.children)) {
-        replies.push( React.createElement(Message, {
-          m: v,
-          key: this.props.thread_id + '/children/' + k,
-          thread_id: this.props.thread_id + '/children/' + k,
-          replies: this.props.replies,
-          handleTyping: this.props.handleTyping,
-          handleSubmit: this.props.handleSubmit,
-          handleReply: this.props.handleReply
-        }));
+        replies.push(<Message
+          m={v}
+          depth={this.props.depth + 1}
+          key={this.props.thread_id + '/children/' + k}
+          thread_id={this.props.thread_id + '/children/' + k}
+          replies={this.props.replies}
+          handleTyping={this.props.handleTyping}
+          handleSubmit={this.props.handleSubmit}
+          handleReply={this.props.handleReply}
+        />);
       }
     }
 
