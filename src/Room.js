@@ -200,7 +200,7 @@ class Room extends React.Component {
         display_emails.push(", ");
       }
     } else {
-      display_emails = ["This room is open to any logged in user with the link: ", <br key="1" />, window.location.href, <br key="2" />];
+      display_emails = ["This room is open to any logged in user with ", <a href={window.location.href}>the link</a>, ".", <br key="1" />];
     }
 
     var deletion_message = null;
