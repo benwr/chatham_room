@@ -66,12 +66,13 @@ const MAX_DEPTH=3;
 class Room extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false};
+    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false, chiming: false};
     this.handleTyping = this.handleTyping.bind(this);
     this.handleUncloak = this.handleUncloak.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleReply = this.handleReply.bind(this);
     this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
+    this.handleToggleChime = this.handleToggleChime.bind(this);
   }
 
   componentDidMount() {
@@ -163,10 +164,12 @@ class Room extends React.Component {
     });
   }
 
+  handleToggleChime(event) {
+    this.setState({chiming: event.target.checked});
+  }
+
   handleGlobalUncloak(event) {
-    this.setState({
-      globally_uncloaked: event.target.checked
-    });
+    this.setState({globally_uncloaked: event.target.checked});
   }
 
   render() {
@@ -186,6 +189,7 @@ class Room extends React.Component {
             handleSubmit={this.handleSubmit}
             handleReply={this.handleReply}
             globally_uncloaked={this.state.globally_uncloaked}
+            chime={this.state.chiming}
           />
         );
       }
@@ -219,8 +223,9 @@ class Room extends React.Component {
             {deletion_message}
             <br />
             <label>Uncloak my messages by default: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
+            <label className="chime-box">Chime on new messages: <input type="checkbox" checked={this.state.chiming} onChange={this.handleToggleChime} /></label>
           </div>
-        </div>
+          </div>
         <br />
         <br />
         {messages}
@@ -310,6 +315,12 @@ class Message extends React.Component {
     this.handleClickReply = this.handleClickReply.bind(this);
   }
 
+  componentDidMount() {
+    if (this.props.chime) {
+      (new Audio("/bell.wav")).play();
+    }
+  }
+
   handleClickReply(event) {
     event.preventDefault();
     this.props.handleReply(this.props.thread_id);
@@ -378,6 +389,7 @@ class Message extends React.Component {
           handleReply={this.props.handleReply}
           handleUncloak={this.props.handleUncloak}
           globally_uncloaked={this.props.globally_uncloaked}
+          chime={this.props.chime}
         />);
       }
     }
