@@ -1,6 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+
+body {
+  font-family: "Open Sans", sans-serif;
+}
+
 div#wrapper {
   margin: auto;
-  padding: 2em;
+  padding: 0.5em;
   max-width: 60em;
 }
 
@@ -51,10 +57,24 @@ div.room {
   padding: 1em;
 }
 
-input.message-input {
+form.message-form {
   margin-left: 0.5em;
   margin-right: 0.5em;
 }
+
+.message-input {
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  width: 100%;
+  box-sizing: border-box;
+  height: auto;
+  /*-moz-box-sizing: border-box;*/
+}
+
+.uncloak {
+  margin-left: 1em;
+}
+
 
 div#create-room-form {
   max-width: 60em;

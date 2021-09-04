@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import React from "react";
 import ReactDOM from "react-dom";
 import md5 from "md5";
+import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
 
 class RoomContainerRouted extends React.Component {
@@ -157,6 +158,7 @@ class ReplyForm extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleTickBox = this.handleTickBox.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   componentDidMount() {
@@ -181,18 +183,24 @@ class ReplyForm extends React.Component {
     this.props.handleSubmit(this.props.thread_id);
   }
 
+  handleKeyDown(event) {
+    if (event.keyCode === 13 && !event.shiftKey) {
+      this.handleSubmit(event);
+    }
+  }
+
   shouldComponentUpdate(nextProps) {
     return this.props.content !== nextProps.content || this.props.thread_id !== nextProps.thread_id
   }
 
   render() {
     return (<form className="message-form" onSubmit={this.handleSubmit}>
-        <input className="message-input" ref={inputref => {this.inputref = inputref}} id={this.props.thread_id} type="text" value={this.props.content} onChange={this.handleChange} />
-        <button className="message-button" type="submit">Send</button>
+        <TextareaAutosize className="message-input" ref={inputref => {this.inputref = inputref}} id={this.props.thread_id} type="text" value={this.props.content} onChange={this.handleChange} onKeyDown={this.handleKeyDown} />
         <br />
-        <label>
-          Send Uncloaked:
-          <input type="checkbox" value={this.props.uncloaked} onChange={this.handleTickBox} />
+        <button className="message-button" type="submit">Send</button>
+        <label className="uncloak">
+          (Uncloaked:
+          <input type="checkbox" value={this.props.uncloaked} onChange={this.handleTickBox} />)
         </label>
       </form>)
   }
@@ -267,6 +275,7 @@ class Message extends React.Component {
           handleTyping={this.props.handleTyping}
           handleSubmit={this.props.handleSubmit}
           handleReply={this.props.handleReply}
+          handleUncloak={this.props.handleUncloak}
         />);
       }
     }
