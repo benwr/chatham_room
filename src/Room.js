@@ -200,7 +200,7 @@ class Room extends React.Component {
         display_emails.push(", ");
       }
     } else {
-      display_emails = ["This room is open to any logged in user with ", <a href={window.location.href}>the link</a>, ".", <br key="1" />];
+      display_emails = ["This room is open to any logged in user with ", <a key="1" href={window.location.href}>the link</a>, ".", <br key="2" />];
     }
 
     var deletion_message = null;
@@ -328,14 +328,17 @@ class Message extends React.Component {
       stamp = <span className="timestamp" />
     }
 
+    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>
+
     var byline;
     if (this.props.m.author) {
       byline = (<div className="byline">
+          {indentation}
           <img alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
           {this.props.m.author} {stamp}
         </div>);
     } else {
-      byline = <div className="byline">{stamp}</div>;
+      byline = <div className="byline">{indentation}{stamp}</div>;
     }
     var reply_content;
     if (this.props.depth < MAX_DEPTH) {
@@ -379,7 +382,8 @@ class Message extends React.Component {
       }
     }
 
-    var content_lines = this.props.m.content.split("\n").flatMap(e => [<br key={e} />, e]).slice(1);
+
+    var content_lines = this.props.m.content.split("\n").flatMap((e, i) => [<br key={i} />, indentation, e]).slice(1);
 
     return <div className="message">
       {byline}
