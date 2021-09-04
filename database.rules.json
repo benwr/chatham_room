@@ -19,23 +19,13 @@
         ".read": "auth.token.email_verified === true",
         "messages" : {
           "$message1_id": {
-            ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+            ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()",
             "children": {
               "$message2_id": {
-                ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+                ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()",
                 "children": {
                   "$message3_id": {
-                    ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
-                    "children": {
-                      "$message4_id": {
-                        ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
-                        "children": {
-                          "$message5_id": {
-                            ".validate": "(!newData.child('author').exists() || newData.child('author').val() === auth.token.email) && !newData.child('children').exists()"
-                          }
-                        }
-                      }
-                    }
+                    ".validate": "(!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()) && !newData.child('children').exists()",
                   }
                 }
               }
@@ -51,23 +41,13 @@
         ".validate": "!data.child('emails').exists() || (data.child('emails').val().contains(',' + auth.token.email + ',') && newData.child('emails').val() === data.child('emails').val())",
         "messages" : {
           "$message1_id": {
-            ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+            ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()",
             "children": {
               "$message2_id": {
-                ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+                ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()",
                 "children": {
                   "$message3_id": {
-                    ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
-                    "children": {
-                      "$message4_id": {
-                        ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
-                        "children": {
-                          "$message5_id": {
-                            ".validate": "(!newData.child('author').exists() || newData.child('author').val() === auth.token.email) && !newData.child('children').exists()"
-                          }
-                        }
-                      }
-                    }
+                    ".validate": "(!newData.child('author').exists() || newData.child('author').val() === auth.token.email || newData.child('author').val() === data.child('author').val()) && !newData.child('children').exists()",
                   }
                 }
               }
