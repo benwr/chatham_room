@@ -51,6 +51,12 @@ class Room extends React.Component {
     })
   }
 
+  componentDidUpdate() {
+    if (document.activeElement.tagName === "textarea") {
+      document.activeElement.scrollIntoView({block: "center", behavior: "smooth"});
+    }
+  }
+
   handleTyping(thread_id, content) {
     var newstate;
     if (!this.state[thread_id]) {

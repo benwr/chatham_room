@@ -68,7 +68,7 @@ form.message-form {
   width: 100%;
   box-sizing: border-box;
   height: auto;
-  /*-moz-box-sizing: border-box;*/
+  font-family: "Open Sans", sans-serif;
 }
 
 .uncloak {
