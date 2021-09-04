@@ -1,42 +1,50 @@
 import { push, ref, set, onValue, serverTimestamp } from "firebase/database";
 import { onAuthStateChanged } from "firebase/auth";
 import React from "react";
-import ReactDOM from "react-dom";
 import md5 from "md5";
 import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
 
 class RoomContainerRouted extends React.Component {
+  state = {};
+
   componentDidMount() {
     const id = this.props.match.params.id;
     const room_ref = ref(this.props.db, "/rooms/" + id);
 
     onValue(room_ref, (snapshot) => {
-      const data = snapshot.val();
-      const domContainer = document.querySelector("#room");
-      ReactDOM.render(<Room db={this.props.db} auth={this.props.auth} room_id={id} room={data} />, domContainer);
+      this.setState({data: snapshot.val()});
     })
   }
 
   render() {
-    return <div id="room" />;
+    if (this.state.data) {
+      return <Room db={this.props.db} auth={this.props.auth} room_id={this.props.match.params.id} room={this.state.data} />;
+    }
+    else {
+      return "Unable to load room. Are you logged in?"
+    }
   }
 }
 
 class LinkableContainerRouted extends React.Component {
+  state = {}
+
   componentDidMount() {
     const id = this.props.match.params.id;
     const room_ref = ref(this.props.db, "/linkables/" + id);
 
     onValue(room_ref, (snapshot) => {
-      const data = snapshot.val();
-      const domContainer = document.querySelector("#room");
-      ReactDOM.render(<Room db={this.props.db} auth={this.props.auth} linkable_id={id} room={data} />, domContainer);
+      this.setState({data: snapshot.val()});
     })
   }
 
   render() {
-    return <div id="room" />;
+    if (this.state.data) {
+      return <Room db={this.props.db} auth={this.props.auth} linkable_id={this.props.match.params.id} room={this.state.data} />;
+    } else {
+      return "Unable to load room. Are you logged in?";
+    }
   }
 }
 
@@ -48,11 +56,12 @@ const MAX_DEPTH=3;
 class Room extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {"ROOT": {content: "", uncloaked: false}, "email": ""};
+    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false};
     this.handleTyping = this.handleTyping.bind(this);
     this.handleUncloak = this.handleUncloak.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleReply = this.handleReply.bind(this);
+    this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
   }
 
   componentDidMount() {
@@ -60,11 +69,21 @@ class Room extends React.Component {
       if (user) {
         this.setState({"email": user.email});
       }
-      if (user && this.props.room.emails && this.props.room.emails.includes("," + user.email + ",")) {
-        var visited_ref = ref(this.props.db, "users/" + user.uid + "/visited/" + this.props.room_id);
+      var visited_ref;
+      if (this.props.room_id) {
+        visited_ref = ref(this.props.db, "users/" + user.uid + "/visited/" + this.props.room_id);
+      } else {
+        visited_ref = ref(this.props.db, "users/" + user.uid + "/visited_linkables/" + this.props.linkable_id);
+      }
+      if (this.props.room.emails) {
         set(visited_ref, {
           name: this.props.room.name,
           emails: this.props.room.emails,
+          time: serverTimestamp(),
+        });
+      } else {
+        set(visited_ref, {
+          name: this.props.room.name,
           time: serverTimestamp(),
         });
       }
@@ -110,7 +129,7 @@ class Room extends React.Component {
     } else {
       new_ref = push(ref(this.props.db, prefix + "/messages/" + thread_id + "/children"));
     }
-    if (this.state[thread_id].uncloaked) {
+    if (this.state[thread_id].uncloaked || this.state.globally_uncloaked) {
       set(new_ref, {
         content: this.state[thread_id].content,
         author: this.state.email,
@@ -134,6 +153,12 @@ class Room extends React.Component {
     });
   }
 
+  handleGlobalUncloak(event) {
+    this.setState({
+      globally_uncloaked: event.target.checked
+    });
+  }
+
   render() {
     let messages = [];
 
@@ -150,6 +175,7 @@ class Room extends React.Component {
             handleUncloak={this.handleUncloak}
             handleSubmit={this.handleSubmit}
             handleReply={this.handleReply}
+            globally_uncloaked={this.state.globally_uncloaked}
           />
         );
       }
@@ -170,7 +196,12 @@ class Room extends React.Component {
     return <div className="room">
         <div className="room-info">
           <h2>{this.props.room.name}</h2>
-          <div className="email-list">{display_emails.slice(0, -1)}</div>
+          <div className="email-list">
+            {display_emails.slice(0, -1)}
+            <br />
+            <br />
+            <label>Uncloak globally: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
+          </div>
         </div>
         <br />
         <br />
@@ -182,6 +213,7 @@ class Room extends React.Component {
           thread_id="ROOT"
           content={this.state["ROOT"].content}
           uncloaked={this.state["ROOT"].uncloaked}
+          globally_uncloaked={this.state.globally_uncloaked}
       />
       </div>
   }
@@ -203,7 +235,7 @@ class ReplyForm extends React.Component {
   }
 
   componentDidUpdate() {
-    this.inputref.scrollIntoView({block: "center", behavior: "smooth"});
+    // this.inputref.scrollIntoView({block: "center", behavior: "smooth"});
   }
 
   handleChange(event) {
@@ -226,21 +258,32 @@ class ReplyForm extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    return this.props.content !== nextProps.content || this.props.thread_id !== nextProps.thread_id || this.props.uncloaked !== nextProps.uncloaked
+    return this.props.content !== nextProps.content || this.props.thread_id !== nextProps.thread_id || this.props.uncloaked !== nextProps.uncloaked || this.props.globally_uncloaked !== nextProps.globally_uncloaked
   }
 
   render() {
+    var uncloak_info;
+    if (this.props.globally_uncloaked) {
+      uncloak_info = (
+        <label className="uncloak">
+        (Globally uncloaked);
+        </label>
+      )
+    } else {
+      uncloak_info = (
+        <label className="uncloak">
+          (Uncloaked:
+            <input type="checkbox" checked={this.props.uncloaked} onChange={this.handleTickBox} />);
+        </label>
+      );
+    }
     return (<form className="message-form" onSubmit={this.handleSubmit}>
         <TextareaAutosize className="message-input" ref={inputref => {this.inputref = inputref}} id={this.props.thread_id} type="text" value={this.props.content} onChange={this.handleChange} onKeyDown={this.handleKeyDown} />
         <br />
         <button className="message-button" type="submit">Send</button>
-        <label className="uncloak">
-          (Uncloaked:
-          <input type="checkbox" checked={this.props.uncloaked} onChange={this.handleTickBox} />)
-        </label>
+        {uncloak_info}
       </form>)
   }
-
 }
 
 class Message extends React.Component {
@@ -285,14 +328,15 @@ class Message extends React.Component {
           onClick: this.handleClickReply
         }, "⮑ reply");
       } else {
-        reply_content = React.createElement(ReplyForm, {
-          handleUncloak: this.props.handleUncloak,
-          handleTyping: this.props.handleTyping,
-          handleSubmit: this.props.handleSubmit,
-          thread_id: this.props.thread_id,
-          content: this.props.replies[this.props.thread_id].content,
-          uncloaked: this.props.replies[this.props.thread_id].uncloaked,
-        });
+        reply_content = <ReplyForm
+          handleUncloak={this.props.handleUncloak}
+          handleTyping={this.props.handleTyping}
+          handleSubmit={this.props.handleSubmit}
+          thread_id={this.props.thread_id}
+          content={this.props.replies[this.props.thread_id].content}
+          uncloaked={this.props.replies[this.props.thread_id].uncloaked || this.props.globally_uncloaked}
+          globally_uncloaked={this.props.globally_uncloaked}
+        />;
       }
     } else {
       reply_content = null;
@@ -312,11 +356,12 @@ class Message extends React.Component {
           handleSubmit={this.props.handleSubmit}
           handleReply={this.props.handleReply}
           handleUncloak={this.props.handleUncloak}
+          globally_uncloaked={this.props.globally_uncloaked}
         />);
       }
     }
 
-    var content_lines = this.props.m.content.split("\n").flatMap(e => [<br />, e]).slice(1);
+    var content_lines = this.props.m.content.split("\n").flatMap(e => [<br key={e} />, e]).slice(1);
 
     return <div className="message">
       {byline}
@@ -326,7 +371,6 @@ class Message extends React.Component {
       {reply_content}
     </div>
   }
-
 }
 
 export { RoomContainer, LinkableContainer };
