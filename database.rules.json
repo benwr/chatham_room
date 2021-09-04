@@ -1,5 +1,36 @@
 {
   "rules": {
+    "linkables": {
+      "$room_id": {
+        ".read": "auth.token.email_verified === true",
+        "messages" : {
+          "$message1_id": {
+            ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+            "children": {
+              "$message2_id": {
+                ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+                "children": {
+                  "$message3_id": {
+                    ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+                    "children": {
+                      "$message4_id": {
+                        ".validate": "!newData.child('author').exists() || newData.child('author').val() === auth.token.email",
+                        "children": {
+                          "$message5_id": {
+                            ".validate": "(!newData.child('author').exists() || newData.child('author').val() === auth.token.email) && !newData.child('children').exists()"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      ".write": "auth.token.email_verified === true"
+    },
     "rooms": {
       "$room_id": {
         ".read": "auth.token.email_verified === true && data.child('emails').val().contains(',' + auth.token.email + ',')",

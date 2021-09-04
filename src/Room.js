@@ -9,7 +9,7 @@ import { withRouter } from "react-router-dom";
 class RoomContainerRouted extends React.Component {
   componentDidMount() {
     const id = this.props.match.params.id;
-    const room_ref = ref(this.props.db, "rooms/" + id);
+    const room_ref = ref(this.props.db, "/rooms/" + id);
 
     onValue(room_ref, (snapshot) => {
       const data = snapshot.val();
@@ -23,9 +23,27 @@ class RoomContainerRouted extends React.Component {
   }
 }
 
-var RoomContainer = withRouter(RoomContainerRouted);
+class LinkableContainerRouted extends React.Component {
+  componentDidMount() {
+    const id = this.props.match.params.id;
+    const room_ref = ref(this.props.db, "/linkables/" + id);
 
-const MAX_DEPTH=5;
+    onValue(room_ref, (snapshot) => {
+      const data = snapshot.val();
+      const domContainer = document.querySelector("#room");
+      ReactDOM.render(<Room db={this.props.db} auth={this.props.auth} linkable_id={id} room={data} />, domContainer);
+    })
+  }
+
+  render() {
+    return <div id="room" />;
+  }
+}
+
+var RoomContainer = withRouter(RoomContainerRouted);
+var LinkableContainer = withRouter(LinkableContainerRouted);
+
+const MAX_DEPTH=3;
 
 class Room extends React.Component {
   constructor(props) {
@@ -39,8 +57,10 @@ class Room extends React.Component {
 
   componentDidMount() {
     onAuthStateChanged(this.props.auth, (user) => {
+      if (user) {
+        this.setState({"email": user.email});
+      }
       if (user && this.props.room.emails && this.props.room.emails.includes("," + user.email + ",")) {
-        this.setState({"email": user.email})
         var visited_ref = ref(this.props.db, "users/" + user.uid + "/visited/" + this.props.room_id);
         set(visited_ref, {
           name: this.props.room.name,
@@ -79,10 +99,16 @@ class Room extends React.Component {
 
   handleSubmit(thread_id) {
     var new_ref;
-    if (thread_id === "ROOT") {
-      new_ref = push(ref(this.props.db, "rooms/" + this.props.room_id + "/messages"));
+    var prefix;
+    if (this.props.room_id) {
+      prefix = "rooms/" + this.props.room_id;
     } else {
-      new_ref = push(ref(this.props.db, "rooms/" + this.props.room_id + "/messages/" + thread_id + "/children"));
+      prefix = "linkables/" + this.props.linkable_id;
+    }
+    if (thread_id === "ROOT") {
+      new_ref = push(ref(this.props.db, prefix + "/messages"));
+    } else {
+      new_ref = push(ref(this.props.db, prefix + "/messages/" + thread_id + "/children"));
     }
     if (this.state[thread_id].uncloaked) {
       set(new_ref, {
@@ -129,12 +155,16 @@ class Room extends React.Component {
       }
     }
 
-    const emails = this.props.room.emails.slice(1, -1).split(",");
-    var display_emails = [];
-    for (const email of emails) {
-      display_emails.push(<img key={email + "avatar"} alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(email) + "?d=retro"} />);
-      display_emails.push(email);
-      display_emails.push(", ");
+    if (this.props.room.emails) {
+      const emails = this.props.room.emails.slice(1, -1).split(",");
+      var display_emails = [];
+      for (const email of emails) {
+        display_emails.push(<img key={email + "avatar"} alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(email) + "?d=retro"} />);
+        display_emails.push(email);
+        display_emails.push(", ");
+      }
+    } else {
+      display_emails = ["This room is open to any logged in user with the link: ", <br key="1" />, window.location.href, <br key="2" />];
     }
 
     return <div className="room">
@@ -181,22 +211,22 @@ class ReplyForm extends React.Component {
   }
 
   handleTickBox(event) {
-    this.props.handleUncloak(this.props.thread_id, event.target.value);
+    this.props.handleUncloak(this.props.thread_id, event.target.checked);
   }
 
   handleSubmit(event) {
-    event.preventDefault();
     this.props.handleSubmit(this.props.thread_id);
   }
 
   handleKeyDown(event) {
     if (event.keyCode === 13 && !event.shiftKey) {
+      event.preventDefault();
       this.handleSubmit(event);
     }
   }
 
   shouldComponentUpdate(nextProps) {
-    return this.props.content !== nextProps.content || this.props.thread_id !== nextProps.thread_id
+    return this.props.content !== nextProps.content || this.props.thread_id !== nextProps.thread_id || this.props.uncloaked !== nextProps.uncloaked
   }
 
   render() {
@@ -206,7 +236,7 @@ class ReplyForm extends React.Component {
         <button className="message-button" type="submit">Send</button>
         <label className="uncloak">
           (Uncloaked:
-          <input type="checkbox" value={this.props.uncloaked} onChange={this.handleTickBox} />)
+          <input type="checkbox" checked={this.props.uncloaked} onChange={this.handleTickBox} />)
         </label>
       </form>)
   }
@@ -299,4 +329,4 @@ class Message extends React.Component {
 
 }
 
-export { RoomContainer };
+export { RoomContainer, LinkableContainer };

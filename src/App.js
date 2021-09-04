@@ -5,7 +5,7 @@ import {
 } from "react-router-dom";
 import React from "react";
 import { CreateRoom } from "./CreateRoom.js";
-import { RoomContainer } from "./Room.js";
+import { RoomContainer, LinkableContainer } from "./Room.js";
 import { LoginContainer } from "./Login.js";
 import { CompleteLoginContainer } from "./CompleteLogin.js";
 import { AuthNav } from "./AuthBox.js";
@@ -22,6 +22,11 @@ function App() {
         <Route path="/room/:id">
           <AuthNav auth={auth}>
             <RoomContainer db={db} auth={auth} />
+          </AuthNav>
+        </Route>
+        <Route path="/linkable/:id">
+          <AuthNav auth={auth}>
+            <LinkableContainer db={db} auth={auth} />
           </AuthNav>
         </Route>
         <Route path="/about">

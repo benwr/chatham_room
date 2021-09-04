@@ -1,5 +1,6 @@
 import React from "react";
 import { push, ref, set } from "firebase/database";
+import { uuid} from "uuidv4";
 import { onAuthStateChanged } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 
@@ -9,7 +10,8 @@ class CreateRoom extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleEmailsChange = this.handleEmailsChange.bind(this);
-    this.state = {logged_in: false, name: "", emails: "" };
+    this.handleLinkableChange = this.handleLinkableChange.bind(this);
+    this.state = {logged_in: false, name: "", emails: "", linkable: false };
   }
 
   handleNameChange(event) {
@@ -32,29 +34,42 @@ class CreateRoom extends React.Component {
     this.setState({emails: event.target.value});
   }
 
+  handleLinkableChange(event) {
+    this.setState({linkable: event.target.checked});
+  }
+
   handleSubmit(event) {
     event.preventDefault();
-    var new_ref = push(ref(this.props.db, "rooms"));
-    const email_list = this.state.emails.split(/[\s,]+/);
-
-    const emails = "," + email_list.join(",") + ",";
-    set(new_ref, {
-      messages: {},
-      name: this.state.name,
-      emails: emails,
-    }).then(() => {
-      const sendInvitation = httpsCallable(this.props.functions, "sendInvitation");
-      sendInvitation({
-        targets: email_list,
-        room_name: this.state.name,
-        room_id: new_ref.key
-      }, this.props.auth).then(() => {
-        window.location.href = "/room/" + new_ref.key;
-      }).catch((e) => {
-        console.log(e);
-        window.location.href = "/room/" + new_ref.key;
+    if (this.state.linkable) {
+      const new_id = uuid() + "-" + uuid();
+      set(ref(this.props.db, "linkables/" + new_id), {
+        messages: {},
+        name: this.state.name,
       });
-    });
+      window.location.href = "/linkable/" + new_id;
+    } else {
+      var new_ref = push(ref(this.props.db, "rooms"));
+      const email_list = this.state.emails.split(/[\s,]+/);
+
+      const emails = "," + email_list.join(",") + ",";
+      set(new_ref, {
+        messages: {},
+        name: this.state.name,
+        emails: emails,
+      }).then(() => {
+        const sendInvitation = httpsCallable(this.props.functions, "sendInvitation");
+        sendInvitation({
+          targets: email_list,
+          room_name: this.state.name,
+          room_id: new_ref.key
+        }, this.props.auth).then(() => {
+          window.location.href = "/room/" + new_ref.key;
+        }).catch((e) => {
+          console.log(e);
+          window.location.href = "/room/" + new_ref.key;
+        });
+      });
+    }
   }
 
   render() {
@@ -68,9 +83,11 @@ class CreateRoom extends React.Component {
         <br />
         <input id="room_name" type="text" value={this.state.name} onChange={this.handleNameChange} />
         <br />
+        <label>Room with unknown participants (get shareable link): <input id="linkable" type="checkbox" checked={this.state.linkable} onChange={this.handleLinkableChange} /></label>
+        <br />
         <label>User Emails (separated by commas or spaces): </label>
         <br />
-        <textarea id="user_emails" cols="45" rows="3" value={this.state.emails} onChange={this.handleEmailsChange} />
+        <textarea id="user_emails" cols="45" rows="3" disabled={this.state.linkable} value={this.state.emails} onChange={this.handleEmailsChange} />
         <br />
         <button type="submit">Create</button>
       </form>
