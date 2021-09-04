@@ -270,13 +270,14 @@ class ReplyForm extends React.Component {
   }
 
   handleSubmit(event) {
+    event.preventDefault();
     this.props.handleSubmit(this.props.thread_id);
   }
 
   handleKeyDown(event) {
     if (event.keyCode === 13 && !event.shiftKey) {
       event.preventDefault();
-      this.handleSubmit(event);
+      this.props.handleSubmit(this.props.thread_id);
     }
   }
 
