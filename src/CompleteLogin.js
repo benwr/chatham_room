@@ -17,7 +17,6 @@ class CompleteLoginContainer extends React.Component {
         }
         signInWithEmailLink(this.props.auth, email, window.location.href).then(
           (result) => {
-            window.localStorage.removeItem("emailForSignIn")
             this.setState({logged_in: true});
           }
         ).catch(() => this.setState({error: true}));
