@@ -174,9 +174,7 @@ class Room extends React.Component {
   }
 
   registerMessage(id) {
-    console.log(id);
     var new_most_recent = [id].concat(this.state.most_recent_messages.slice(0, 2));
-    console.log(new_most_recent);
     this.setState({most_recent_messages: new_most_recent});
   }
 
