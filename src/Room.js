@@ -66,13 +66,14 @@ const MAX_DEPTH=3;
 class Room extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false, chiming: false};
+    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false, chiming: false, most_recent_messages: []};
     this.handleTyping = this.handleTyping.bind(this);
     this.handleUncloak = this.handleUncloak.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleReply = this.handleReply.bind(this);
     this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
     this.handleToggleChime = this.handleToggleChime.bind(this);
+    this.registerMessage = this.registerMessage.bind(this);
   }
 
   componentDidMount() {
@@ -172,6 +173,10 @@ class Room extends React.Component {
     this.setState({globally_uncloaked: event.target.checked});
   }
 
+  registerMessage(id) {
+    this.setState({most_recent_messages: [id].concat(this.state.most_recent_messages.slice(0, 2))});
+  }
+
   render() {
     let messages = [];
 
@@ -190,6 +195,8 @@ class Room extends React.Component {
             handleReply={this.handleReply}
             globally_uncloaked={this.state.globally_uncloaked}
             chime={this.state.chiming}
+            registerMessage={this.registerMessage}
+            most_recent_messages={this.state.most_recent_messages}
           />
         );
       }
@@ -320,6 +327,7 @@ class Message extends React.Component {
     if (this.props.chime) {
       (new Audio("/bell.wav")).play();
     }
+    this.props.registerMessage(this.props.thread_id);
   }
 
   handleClickReply(event) {
@@ -333,7 +341,13 @@ class Message extends React.Component {
       const dt = new Date(this.props.m.time);
       const date = dt.toDateString();
       const time = dt.toLocaleTimeString();
-      stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} className="timestamp">
+      const stamp_style = {};
+      if (this.props.most_recent_messages && this.props.most_recent_messages.includes(this.props.thread_id)) {
+        stamp_style.fontWeight = "bold";
+        stamp_style.color = "#000";
+
+      }
+      stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} style={stamp_style} className="timestamp">
         {"@ " + date + " " + time}
       </a>);
     } else {
@@ -369,6 +383,7 @@ class Message extends React.Component {
           content={this.props.replies[this.props.thread_id].content}
           uncloaked={this.props.replies[this.props.thread_id].uncloaked || this.props.globally_uncloaked}
           globally_uncloaked={this.props.globally_uncloaked}
+          most_recent_messages={this.props.most_recent_messages}
         />;
       }
     } else {
@@ -391,6 +406,7 @@ class Message extends React.Component {
           handleUncloak={this.props.handleUncloak}
           globally_uncloaked={this.props.globally_uncloaked}
           chime={this.props.chime}
+          registerMessage={this.props.registerMessage}
         />);
       }
     }
