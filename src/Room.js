@@ -11,15 +11,20 @@ class RoomContainerRouted extends React.Component {
   componentDidMount() {
     const id = this.props.match.params.id;
     const room_ref = ref(this.props.db, "/rooms/" + id);
+    const deletion_ref = ref(this.props.db, "/delete_dates/room/" + id)
 
     onValue(room_ref, (snapshot) => {
       this.setState({data: snapshot.val()});
+    })
+
+    onValue(deletion_ref, (snapshot) => {
+      this.setState({deletion_date: snapshot.val()});
     })
   }
 
   render() {
     if (this.state.data) {
-      return <Room db={this.props.db} auth={this.props.auth} room_id={this.props.match.params.id} room={this.state.data} />;
+      return <Room db={this.props.db} auth={this.props.auth} room_id={this.props.match.params.id} room={this.state.data} deletion_date={this.state.deletion_date} />;
     }
     else {
       return "Unable to load room. Are you logged in?"
@@ -33,15 +38,20 @@ class LinkableContainerRouted extends React.Component {
   componentDidMount() {
     const id = this.props.match.params.id;
     const room_ref = ref(this.props.db, "/linkables/" + id);
+    const deletion_ref = ref(this.props.db, "/delete_dates/linkable/" + id)
 
     onValue(room_ref, (snapshot) => {
       this.setState({data: snapshot.val()});
+    })
+
+    onValue(deletion_ref, (snapshot) => {
+      this.setState({deletion_date: snapshot.val()});
     })
   }
 
   render() {
     if (this.state.data) {
-      return <Room db={this.props.db} auth={this.props.auth} linkable_id={this.props.match.params.id} room={this.state.data} />;
+      return <Room db={this.props.db} auth={this.props.auth} linkable_id={this.props.match.params.id} room={this.state.data} deletion_date={this.state.deletion_date}/>;
     } else {
       return "Unable to load room. Are you logged in?";
     }
@@ -193,12 +203,20 @@ class Room extends React.Component {
       display_emails = ["This room is open to any logged in user with the link: ", <br key="1" />, window.location.href, <br key="2" />];
     }
 
+    var deletion_message = null;
+    if (this.props.deletion_date) {
+      var date = new Date(this.props.deletion_date);
+      deletion_message = "This room is scheduled to be deleted after " + date.toLocaleTimeString() + " on " + date.toLocaleDateString();
+    }
+
     return <div className="room">
         <div className="room-info">
           <h2>{this.props.room.name}</h2>
           <div className="email-list">
             {display_emails.slice(0, -1)}
             <br />
+            <br />
+            {deletion_message}
             <br />
             <label>Uncloak globally: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
           </div>

@@ -19,10 +19,11 @@ class LoginContainer extends React.Component {
     event.preventDefault();
     var target_url;
     if (window.location.port) {
-      target_url = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/complete_login/" + encodeURIComponent(window.location.pathname);
+      target_url = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/complete_login/" + encodeURIComponent(encodeURIComponent(window.location.pathname));
     } else {
-      target_url = window.location.protocol + "//" + window.location.hostname + "/complete_login/" + encodeURIComponent(window.location.pathname);
+      target_url = window.location.protocol + "//" + window.location.hostname + "/complete_login/" + encodeURIComponent(encodeURIComponent(window.location.pathname));
     }
+    console.log(target_url);
     const actionCodeSettings = {
       url: target_url,
       handleCodeInApp: true,

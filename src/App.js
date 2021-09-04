@@ -44,6 +44,12 @@ function App() {
         <Route path="/complete_login/:target">
           <CompleteLoginContainer auth={auth} />
         </Route>
+        <Route path="/complete_login/">
+          <CompleteLoginContainer auth={auth} />
+        </Route>
+        <Route path="/complete_login">
+          <CompleteLoginContainer auth={auth} />
+        </Route>
         <Route path="/">
           <AuthNav auth={auth}>
             <VisitedList db={db} auth={auth} />

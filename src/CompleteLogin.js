@@ -32,8 +32,12 @@ class CompleteLoginContainerRouted extends React.Component {
         message = (<p>Something went wrong. Please <a href="/login">try signing in again</a>.
              Note that you can only use each sign in link one time.</p>
         );
-    } else {
+    } else if (this.props.match.params.target) {
+      console.log(this.props.match.params.target);
+      console.log(decodeURIComponent(this.props.match.params.target));
       return <Redirect to={decodeURIComponent(this.props.match.params.target)} />
+    } else {
+      return <Redirect to="/" />
     }
     return <div id="wrapper">{message}</div>
   }
