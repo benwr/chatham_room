@@ -174,7 +174,10 @@ class Room extends React.Component {
   }
 
   registerMessage(id) {
-    this.setState({most_recent_messages: [id].concat(this.state.most_recent_messages.slice(0, 2))});
+    console.log(id);
+    var new_most_recent = [id].concat(this.state.most_recent_messages.slice(0, 2));
+    console.log(new_most_recent);
+    this.setState({most_recent_messages: new_most_recent});
   }
 
   render() {
@@ -407,6 +410,7 @@ class Message extends React.Component {
           globally_uncloaked={this.props.globally_uncloaked}
           chime={this.props.chime}
           registerMessage={this.props.registerMessage}
+          most_recent_messages={this.props.most_recent_messages}
         />);
       }
     }
