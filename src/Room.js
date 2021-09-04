@@ -218,7 +218,7 @@ class Room extends React.Component {
             <br />
             {deletion_message}
             <br />
-            <label>Uncloak globally: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
+            <label>Uncloak my messages by default: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
           </div>
         </div>
         <br />
@@ -284,7 +284,7 @@ class ReplyForm extends React.Component {
     if (this.props.globally_uncloaked) {
       uncloak_info = (
         <label className="uncloak">
-        (Globally uncloaked);
+        (Default uncloaked);
         </label>
       )
     } else {

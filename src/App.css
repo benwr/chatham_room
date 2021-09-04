@@ -49,6 +49,7 @@ a.reply-link {
   text-decoration: none;
   display: block;
   margin-left: 0.5em;
+  user-select: none;
 }
 
 div.room {
