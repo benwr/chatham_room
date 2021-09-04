@@ -89,7 +89,7 @@ class CreateRoom extends React.Component {
         <br />
         <textarea id="user_emails" cols="45" rows="3" disabled={this.state.linkable} value={this.state.emails} onChange={this.handleEmailsChange} />
         <br />
-        <button type="submit">Create</button>
+        <button type="submit" disabled={!this.state.name}>Create</button>
       </form>
       </div>
     );
