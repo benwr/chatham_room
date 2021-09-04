@@ -286,9 +286,11 @@ class Message extends React.Component {
       }
     }
 
+    var content_lines = this.props.m.content.split("\n").flatMap(e => [<br />, e]).slice(1);
+
     return <div className="message">
       {byline}
-      {this.props.m.content}
+      {content_lines}
       <br />
       {replies}
       {reply_content}
