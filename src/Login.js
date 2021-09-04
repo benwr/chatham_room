@@ -19,9 +19,9 @@ class LoginContainer extends React.Component {
     event.preventDefault();
     var target_url;
     if (window.location.port) {
-      target_url = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/complete_login";
+      target_url = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/complete_login/" + encodeURIComponent(window.location.pathname);
     } else {
-      target_url = window.location.protocol + "//" + window.location.hostname + "/complete_login";
+      target_url = window.location.protocol + "//" + window.location.hostname + "/complete_login/" + encodeURIComponent(window.location.pathname);
     }
     const actionCodeSettings = {
       url: target_url,
@@ -30,23 +30,26 @@ class LoginContainer extends React.Component {
     window.localStorage.setItem("emailForSignIn", this.state.address);
     sendSignInLinkToEmail(this.props.auth, this.state.address, actionCodeSettings)
       .then(() => this.setState({sent: true}))
-      .catch(() => this.setState({error: true}));
+      .catch(e => {console.log(e); this.setState({error: true})});
   }
 
   render () {
     var message;
     if (this.state.sent) {
-      message = <p>Email sent.</p>
+      message = <p>Email sent. Note that it may have been delivered to your spam folder.</p>
     } else if (this.state.error){
       message = <p>There was an error. You may wish to try again.</p>
     }
 
     return (
       <div id="login-form">
-        <form onSubmit={this.handleSubmit}>
-          <label>Your email address: </label>
+          You need to log in to access that page. We'll send you an email with a sign in link.
+          <br />
+          <br />
+          <form onSubmit={this.handleSubmit}>
+          <label>Email address: </label>
           <input value={this.state.address} onChange={this.handleTyping} />
-          <button type="submit">Send Login Link</button>
+          <button className="send-login" type="submit">Send Sign In Link</button>
           {message}
         </form>
       </div>

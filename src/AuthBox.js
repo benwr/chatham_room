@@ -2,6 +2,20 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { About } from "./About.js";
+import { LoginContainer } from "./Login.js";
+
+class Nav extends React.Component {
+  render() {
+    return (
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+        <Link to="/create_room">Create Room</Link>
+        {this.props.children}
+      </nav>
+    );
+  }
+}
 
 class AuthNav extends React.Component {
   constructor(props) {
@@ -25,22 +39,19 @@ class AuthNav extends React.Component {
     if (this.state.user) {
       return (
         <div id="wrapper">
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-            <Link to="/create_room">Create Room</Link>
+          <Nav>
             <button onClick={this.logout}>Log out {this.state.user.email}</button>
-          </nav>
+          </Nav>
           {this.props.children}
         </div>
       );
     } else {
       return (<div id="wrapper">
-        <nav><Link to="/login">Log in or sign up</Link></nav>
+        <LoginContainer auth={this.props.auth} />
         <About />
       </div>);
     }
   }
 }
 
-export { AuthNav };
+export { AuthNav, Nav };

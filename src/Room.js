@@ -273,7 +273,7 @@ class ReplyForm extends React.Component {
       uncloak_info = (
         <label className="uncloak">
           (Uncloaked:
-            <input type="checkbox" checked={this.props.uncloaked} onChange={this.handleTickBox} />);
+            <input type="checkbox" checked={this.props.uncloaked} onChange={this.handleTickBox} />)
         </label>
       );
     }

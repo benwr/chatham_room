@@ -1,5 +1,19 @@
 {
   "rules": {
+    "delete_dates": {
+      "linkable": {
+        "$room_id": {
+          ".read": "auth.token.email_verified === true",
+          ".write": "auth.token.email_verified === true && !data.exists()"
+        }
+      },
+      "room": {
+        "$room_id": {
+          ".read": "auth.token.email_verified === true && root.child('rooms/' + $room_id + '/emails').val().contains(',' + auth.token.email + ',')",
+          ".write": "auth.token.email_verified === true && !data.exists()"
+        }
+      }
+    },
     "linkables": {
       "$room_id": {
         ".read": "auth.token.email_verified === true",

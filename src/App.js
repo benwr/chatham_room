@@ -8,7 +8,7 @@ import { CreateRoom } from "./CreateRoom.js";
 import { RoomContainer, LinkableContainer } from "./Room.js";
 import { LoginContainer } from "./Login.js";
 import { CompleteLoginContainer } from "./CompleteLogin.js";
-import { AuthNav } from "./AuthBox.js";
+import { AuthNav, Nav } from "./AuthBox.js";
 import { VisitedList } from "./VisitedList.js";
 import { About } from "./About.js";
 import './App.css';
@@ -30,9 +30,8 @@ function App() {
           </AuthNav>
         </Route>
         <Route path="/about">
-          <AuthNav auth={auth}>
-            <About />
-          </AuthNav>
+          <Nav />
+          <About />
         </Route>
         <Route path="/create_room">
           <AuthNav auth={auth}>
@@ -42,7 +41,7 @@ function App() {
         <Route path="/login">
           <LoginContainer auth={auth} />
         </Route>
-        <Route path="/complete_login">
+        <Route path="/complete_login/:target">
           <CompleteLoginContainer auth={auth} />
         </Route>
         <Route path="/">

@@ -1,8 +1,9 @@
 import React from "react";
 
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import { withRouter, Redirect } from "react-router-dom";
 
-class CompleteLoginContainer extends React.Component {
+class CompleteLoginContainerRouted extends React.Component {
   constructor(props) {
     super(props)
     this.state = {logged_in: false, error: false}
@@ -24,18 +25,20 @@ class CompleteLoginContainer extends React.Component {
     }
   }
   render() {
+    var message;
     if (!this.state.logged_in && !this.state.error) {
-        return <p>Attempting to verify email...</p>
+        message = <p>Attempting to verify email...</p>
     } else if (this.state.error) {
-        return (
-          <p>Something went wrong. Please <a href="/login">try signing in again</a>.
-             Be sure to be consistent about which email address you're using.</p>
+        message = (<p>Something went wrong. Please <a href="/login">try signing in again</a>.
+             Note that you can only use each sign in link one time.</p>
         );
     } else {
-        window.location.href = "/";
-        return <p>Logged in successfully</p>
+      return <Redirect to={decodeURIComponent(this.props.match.params.target)} />
     }
+    return <div id="wrapper">{message}</div>
   }
 }
+
+const CompleteLoginContainer = withRouter(CompleteLoginContainerRouted);
 
 export { CompleteLoginContainer };
