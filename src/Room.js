@@ -126,7 +126,7 @@ class Room extends React.Component {
     const emails = this.props.room.emails.slice(1, -1).split(",");
     var display_emails = [];
     for (const email of emails) {
-      display_emails.push(<img key={email + "avatar"} alt={email + " avatar"} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(email) + "?d=retro"} />);
+      display_emails.push(<img key={email + "avatar"} alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(email) + "?d=retro"} />);
       display_emails.push(email);
       display_emails.push(", ");
     }
@@ -234,7 +234,7 @@ class Message extends React.Component {
     var byline;
     if (this.props.m.author) {
       byline = (<div className="byline">
-          <img alt={this.props.m.author + " avatar"} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
+          <img alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
           {this.props.m.author} {stamp}
         </div>);
     } else {
