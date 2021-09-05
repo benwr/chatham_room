@@ -82,7 +82,7 @@ class Room extends React.Component {
     var most_recent_messages;
     if (props.room.messages) {
       most_recent_messages = getStamps(props.room.messages);
-      most_recent_messages.sort((e1, e2) => {return e1[0].getTime() < e2[0].getTime()});
+      most_recent_messages.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
     } else {
       most_recent_messages = [];
     }
@@ -202,7 +202,7 @@ class Room extends React.Component {
 
   registerMessage(id, stamp) {
     var new_most_recent = this.state.most_recent_messages.concat([[stamp, id]])
-    new_most_recent.sort((e1, e2) => {return e1[0].getTime() < e2[0].getTime()});
+    new_most_recent.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
     this.setState({most_recent_messages: new_most_recent.slice(0, 3)});
   }
 
