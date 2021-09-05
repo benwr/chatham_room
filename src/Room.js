@@ -101,6 +101,7 @@ class Room extends React.Component {
     this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
     this.handleToggleChime = this.handleToggleChime.bind(this);
     this.registerMessage = this.registerMessage.bind(this);
+    this.saveTranscript = this.saveTranscript.bind(this);
   }
 
   componentDidMount() {
@@ -210,6 +211,19 @@ class Room extends React.Component {
     this.setState({most_recent_messages: new_most_recent.slice(0, 3)});
   }
 
+  saveTranscript(event) {
+    event.preventDefault();
+    var html = document.getElementById("messages").innerHTML;
+    var css = [].slice.call(document.getElementsByTagName("style")).map(s => s.outerHTML).join("");
+    var header = "<html><head>" + css + "</head><body><h1>" + this.props.room.name + "</h1>";
+    var footer = "</body></html>"
+    var tempEl = document.createElement("a");
+    tempEl.href = "data:attachment/text," + encodeURIComponent(header + html + footer);
+    tempEl.target = "_blank";
+    tempEl.download = this.props.room.name + ".html";
+    tempEl.click();
+  }
+
   render() {
     let messages = [];
 
@@ -253,13 +267,14 @@ class Room extends React.Component {
       deletion_message = "This room is scheduled to be deleted after " + date.toLocaleTimeString() + " on " + date.toLocaleDateString();
     }
 
-    return <div className="room">
+    return <div id="room">
         <div className="room-info">
           <h2>{this.props.room.name}</h2>
           <div className="email-list">
             {display_emails.slice(0, -1)}
             <br />
             <br />
+            <button className="save-transcript" onClick={this.saveTranscript}>Save Transcript</button>
             {deletion_message}
             <br />
             <label>Uncloak my messages by default: <input type="checkbox" checked={this.state.globally_uncloaked} onChange={this.handleGlobalUncloak} /></label>
@@ -268,7 +283,9 @@ class Room extends React.Component {
           </div>
         <br />
         <br />
+        <div id="messages">
         {messages}
+        </div>
         <ReplyForm
           handleUncloak={this.handleUncloak}
           handleTyping={this.handleTyping}

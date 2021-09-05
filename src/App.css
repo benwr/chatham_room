@@ -52,7 +52,7 @@ a.reply-link {
   user-select: none;
 }
 
-div.room {
+div#room {
   max-width: 60em;
   margin: auto;
   padding: 1em;
@@ -179,3 +179,6 @@ td.left-form {
   margin-left: 1em;
 }
 
+button.save-transcript {
+  margin-right: 1em;
+}
