@@ -201,7 +201,11 @@ class Room extends React.Component {
   }
 
   registerMessage(id, stamp) {
-    var new_most_recent = this.state.most_recent_messages.concat([[stamp, id]])
+    const mrm = this.state.most_recent_messages;
+    if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(id)) {
+      return;
+    }
+    var new_most_recent = mrm.concat([[stamp, id]])
     new_most_recent.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
     this.setState({most_recent_messages: new_most_recent.slice(0, 3)});
   }
