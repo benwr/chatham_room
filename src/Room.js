@@ -63,10 +63,37 @@ var LinkableContainer = withRouter(LinkableContainerRouted);
 
 const MAX_DEPTH=3;
 
+function getStamps(messages, prefix="") {
+  var result = [];
+  for (const [id, message] of Object.entries(messages)) {
+    const my_id = prefix + id;
+    result.push([new Date(message.time), my_id]);
+    if (message.children) {
+      result.push(...getStamps(message.children, my_id + "/children/"))
+    }
+  }
+  return result;
+}
+
 class Room extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {"ROOT": {content: "", uncloaked: false}, "email": "", globally_uncloaked: false, chiming: false, most_recent_messages: []};
+
+    var most_recent_messages;
+    if (props.room.messages) {
+      most_recent_messages = getStamps(props.room.messages);
+      most_recent_messages.sort((e1, e2) => {return e1[0].getTime() < e2[0].getTime()});
+    } else {
+      most_recent_messages = [];
+    }
+
+    this.state = {
+      "ROOT": {content: "", uncloaked: false},
+      "email": "",
+      globally_uncloaked: false,
+      chiming: false,
+      most_recent_messages: most_recent_messages.slice(0, 3),
+    };
     this.handleTyping = this.handleTyping.bind(this);
     this.handleUncloak = this.handleUncloak.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -173,9 +200,10 @@ class Room extends React.Component {
     this.setState({globally_uncloaked: event.target.checked});
   }
 
-  registerMessage(id) {
-    var new_most_recent = [id].concat(this.state.most_recent_messages.slice(0, 2));
-    this.setState({most_recent_messages: new_most_recent});
+  registerMessage(id, stamp) {
+    var new_most_recent = this.state.most_recent_messages.concat([[stamp, id]])
+    new_most_recent.sort((e1, e2) => {return e1[0].getTime() < e2[0].getTime()});
+    this.setState({most_recent_messages: new_most_recent.slice(0, 3)});
   }
 
   render() {
@@ -328,7 +356,7 @@ class Message extends React.Component {
     if (this.props.chime) {
       (new Audio("/bell.wav")).play();
     }
-    this.props.registerMessage(this.props.thread_id);
+    this.props.registerMessage(this.props.thread_id, new Date(this.props.m.time));
   }
 
   handleClickReply(event) {
@@ -343,7 +371,8 @@ class Message extends React.Component {
       const date = dt.toDateString();
       const time = dt.toLocaleTimeString();
       const stamp_style = {};
-      if (this.props.most_recent_messages && this.props.most_recent_messages.includes(this.props.thread_id)) {
+      const mrm = this.props.most_recent_messages;
+      if (mrm && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
         stamp_style.fontWeight = "bold";
         stamp_style.color = "#000";
 
