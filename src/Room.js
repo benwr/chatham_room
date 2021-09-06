@@ -424,13 +424,13 @@ class Message extends React.Component {
     if (this.props.m.time) {
       const dt = new Date(this.props.m.time);
       const date = dt.toDateString();
-      const time = dt.toLocaleTimeString();
+      var time = dt.toLocaleTimeString();
       const stamp_style = {};
       const mrm = this.props.most_recent_messages;
       if (mrm && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
         stamp_style.fontWeight = "bold";
         stamp_style.color = "#000";
-
+        time += " (new)";
       }
       stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} style={stamp_style} className="timestamp">
         {"@ " + date + " " + time}
