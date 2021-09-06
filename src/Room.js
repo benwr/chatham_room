@@ -4,6 +4,9 @@ import React from "react";
 import md5 from "md5";
 import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
+import tinycolor from "tinycolor2";
+
+const base_colors = tinycolor("#fcc").tetrad();
 
 class RoomContainerRouted extends React.Component {
   state = {};
@@ -264,12 +267,15 @@ class Room extends React.Component {
 
   render() {
     let messages = [];
+    var i = 0;
 
     if (this.props.room.messages) {
       for (const [k, v] of Object.entries(this.props.room.messages)) {
+        i += 1;
         messages.push(
           <Message
             m={v}
+            toplevel_index={i}
             depth={1}
             key={k}
             thread_id={k}
@@ -439,7 +445,7 @@ class Message extends React.Component {
       stamp = <span className="timestamp" />
     }
 
-    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>
+    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>;
 
     var byline;
     if (this.props.m.author) {
@@ -492,6 +498,7 @@ class Message extends React.Component {
           globally_uncloaked={this.props.globally_uncloaked}
           registerMessage={this.props.registerMessage}
           most_recent_messages={this.props.most_recent_messages}
+          toplevel_index={this.props.toplevel_index}
         />);
       }
     }
@@ -499,7 +506,15 @@ class Message extends React.Component {
 
     var content_lines = this.props.m.content.split("\n").flatMap((e, i) => [<br key={i} />, indentation, e]).slice(1);
 
-    return <div className="message">
+    var bgcolor = base_colors[this.props.toplevel_index % 4].clone();
+    for (var i = 0; i < this.props.depth; i++) {
+      bgcolor = bgcolor.lighten(4);
+    } 
+
+    console.log(bgcolor.toHexString());
+    var divstyle = {backgroundColor: bgcolor.toHexString()};
+
+    return <div style={divstyle} className="message">
       {byline}
       {content_lines}
       <br />
