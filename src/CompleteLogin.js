@@ -1,12 +1,23 @@
 import React from "react";
 
-import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
+import { onAuthStateChanged, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { withRouter, Redirect } from "react-router-dom";
 
 class CompleteLoginContainerRouted extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {logged_in: false, error: false}
+    if (props.auth.currentUser) {
+      this.state = {logged_in: true, error: false}
+    } else {
+      this.state = {logged_in: false, error: false}
+    }
+    onAuthStateChanged(props.auth, (user) => {
+      if (user) {
+        this.setState({logged_in: true});
+      } else {
+        this.setState({logged_in: false});
+      }
+    });
   }
 
   componentDidMount() {
