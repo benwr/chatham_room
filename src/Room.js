@@ -214,14 +214,33 @@ class Room extends React.Component {
   saveTranscript(event) {
     event.preventDefault();
     var html = document.getElementById("messages").innerHTML;
-    var css = [].slice.call(document.getElementsByTagName("style")).map(s => s.outerHTML).join("");
-    var header = "<html><head>" + css + "</head><body><h1>" + this.props.room.name + "</h1>";
-    var footer = "</body></html>"
-    var tempEl = document.createElement("a");
-    tempEl.href = "data:attachment/text," + encodeURIComponent(header + html + footer);
-    tempEl.target = "_blank";
-    tempEl.download = this.props.room.name + ".html";
-    tempEl.click();
+    var css = [].slice.call(document.getElementsByTagName("style")).map(s => s.outerHTML);
+
+    var link_hrefs = [].slice.call(document.getElementsByTagName("link")).flatMap(
+      l => {
+        if (l.getAttribute("rel") === "stylesheet") {
+          return [l.getAttribute("href")];
+        } else {
+          return [];
+        }
+      }
+    );
+    var req_promises = [];
+    for (const url of link_hrefs) {
+      req_promises.push(fetch(url).then(response => response.text()))
+    }
+    Promise.all(req_promises).then((stylesheets) =>  {
+      for (const stylesheet of stylesheets) {
+        css.push("<style>\n" + stylesheet + "\n</style>");
+      }
+      var header = "<html><head>" + css.join("\n") + "</head><body><h1>" + this.props.room.name + "</h1>";
+      var footer = "</body></html>"
+      var tempEl = document.createElement("a");
+      tempEl.href = "data:attachment/text," + encodeURIComponent(header + html + footer);
+      tempEl.target = "_blank";
+      tempEl.download = this.props.room.name + ".html";
+      tempEl.click();
+    });
   }
 
   render() {
