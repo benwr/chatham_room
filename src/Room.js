@@ -94,6 +94,7 @@ class Room extends React.Component {
       chiming: false,
       most_recent_messages: most_recent_messages.slice(0, 3),
     };
+    this.audio_ctx = new AudioContext();
     this.handleTyping = this.handleTyping.bind(this);
     this.handleUncloak = this.handleUncloak.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -102,6 +103,7 @@ class Room extends React.Component {
     this.handleToggleChime = this.handleToggleChime.bind(this);
     this.registerMessage = this.registerMessage.bind(this);
     this.saveTranscript = this.saveTranscript.bind(this);
+    this.chime = this.chime.bind(this);
   }
 
   componentDidMount() {
@@ -201,6 +203,20 @@ class Room extends React.Component {
     this.setState({globally_uncloaked: event.target.checked});
   }
 
+  chime() {
+    const length = 300;
+    var osc = this.audio_ctx.createOscillator();
+    var gain = this.audio_ctx.createGain();
+    osc.frequency.value = 2200;
+    osc.connect(gain);
+    gain.connect(this.audio_ctx.destination);
+    osc.start();
+    gain.gain.linearRampToValueAtTime(0.2, this.audio_ctx.currentTime + 0.05);
+    gain.gain.linearRampToValueAtTime(0.07, this.audio_ctx.currentTime + length / 8000 * 4);
+    gain.gain.linearRampToValueAtTime(0, this.audio_ctx.currentTime + length / 1500 * 4);
+    osc.stop(this.audio_ctx.currentTime + length / 1000 * 4);
+  }
+
   registerMessage(id, stamp) {
     const mrm = this.state.most_recent_messages;
     if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(id)) {
@@ -209,6 +225,9 @@ class Room extends React.Component {
     var new_most_recent = mrm.concat([[stamp, id]])
     new_most_recent.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
     this.setState({most_recent_messages: new_most_recent.slice(0, 3)});
+    if (this.state.chiming) {
+      this.chime();
+    }
   }
 
   saveTranscript(event) {
@@ -260,7 +279,6 @@ class Room extends React.Component {
             handleSubmit={this.handleSubmit}
             handleReply={this.handleReply}
             globally_uncloaked={this.state.globally_uncloaked}
-            chime={this.state.chiming}
             registerMessage={this.registerMessage}
             most_recent_messages={this.state.most_recent_messages}
           />
@@ -393,9 +411,6 @@ class Message extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.chime) {
-      (new Audio("/bell.wav")).play();
-    }
     this.props.registerMessage(this.props.thread_id, new Date(this.props.m.time));
   }
 
@@ -475,7 +490,6 @@ class Message extends React.Component {
           handleReply={this.props.handleReply}
           handleUncloak={this.props.handleUncloak}
           globally_uncloaked={this.props.globally_uncloaked}
-          chime={this.props.chime}
           registerMessage={this.props.registerMessage}
           most_recent_messages={this.props.most_recent_messages}
         />);
