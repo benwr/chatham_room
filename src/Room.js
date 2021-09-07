@@ -4,6 +4,9 @@ import React from "react";
 import md5 from "md5";
 import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
+import tinycolor from "tinycolor2";
+
+const base_colors = tinycolor("#fcc").tetrad();
 
 class RoomContainerRouted extends React.Component {
   state = {};
@@ -297,12 +300,15 @@ class Room extends React.Component {
 
   render() {
     let messages = [];
+    var i = 0;
 
     if (this.props.room.messages) {
       for (const [k, v] of Object.entries(this.props.room.messages)) {
+        i += 1;
         messages.push(
           <Message
             m={v}
+            toplevel_index={i}
             depth={1}
             key={k}
             thread_id={k}
@@ -388,7 +394,6 @@ class ReplyForm extends React.Component {
   }
 
   componentDidUpdate() {
-    // this.inputref.scrollIntoView({block: "center", behavior: "smooth"});
   }
 
   handleChange(event) {
@@ -466,6 +471,13 @@ class Message extends React.Component {
   }
 
   render() {
+    var bgcolor = base_colors[this.props.toplevel_index % 4].clone();
+    for (var i = 0; i < this.props.depth; i++) {
+      bgcolor = bgcolor.lighten(4);
+    } 
+
+    var divstyle = {backgroundColor: bgcolor.toHexString()};
+
     var stamp;
     if (this.props.m.time) {
       const dt = new Date(this.props.m.time);
@@ -494,6 +506,7 @@ class Message extends React.Component {
       seen_box = <div className="seen-box" onClick={this.handleMarkUnseen}>✓</div>;
     } else {
       seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}>✓</div>;
+      divstyle.border = "1px solid black";
     }
 
     var byline;
@@ -557,6 +570,7 @@ class Message extends React.Component {
           seen={child_seen}
           handleMarkSeen={this.props.handleMarkSeen}
           handleMarkUnseen={this.props.handleMarkUnseen}
+          toplevel_index={this.props.toplevel_index}
         />);
       }
     }
@@ -564,7 +578,7 @@ class Message extends React.Component {
 
     var content_lines = this.props.m.content.split("\n").flatMap((e, i) => [<br key={i} />, indentation, e]).slice(1);
 
-    return <div className="message">
+    return <div style={divstyle} className="message">
       {byline}
       {content_lines}
       <br />
