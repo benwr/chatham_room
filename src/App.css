@@ -44,7 +44,7 @@ nav a:hover {
 }
 
 a.reply-link {
-  color: #aaa;
+  color: #666;
   font-size: 0.6em;
   text-decoration: none;
   display: block;
@@ -121,7 +121,7 @@ div.byline {
 }
 
 div.byline a {
-  color: #999;
+  color: #666;
   text-decoration: none;
 }
 

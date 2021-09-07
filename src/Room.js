@@ -6,7 +6,40 @@ import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
 import tinycolor from "tinycolor2";
 
-const base_colors = tinycolor("#fcc").tetrad();
+const base_colors = [
+  "#ffffff",
+  "#ffffee",
+  "#ffeeff",
+  "#eeffff",
+  "#ffeeee",
+  "#eeffee",
+  "#eeeeff",
+  "#ffffdd",
+  "#ffddff",
+  "#ddffff",
+  "#ffeedd",
+  "#ffddee",
+  "#eeffdd",
+  "#eeddff",
+  "#ddffee",
+  "#ddeeff",
+  "#ffffcc",
+  "#ffccff",
+  "#ccffff",
+  "#eeeeee",
+  "#ffdddd",
+  "#ddffdd",
+  "#ddddff",
+  "#ffffbb",
+  "#ccccff",
+  "#bbffff",
+  "#ffeecc",
+  "#ffccee",
+  "#eeffcc",
+  "#eeccff",
+  "#ccffee",
+  "#cceeff",
+].map(c => tinycolor(c).lighten(3))
 
 class RoomContainerRouted extends React.Component {
   state = {};
@@ -471,12 +504,10 @@ class Message extends React.Component {
   }
 
   render() {
-    var bgcolor = base_colors[this.props.toplevel_index % 4].clone();
-    for (var i = 0; i < this.props.depth; i++) {
-      bgcolor = bgcolor.lighten(4);
-    } 
+    const color_index = parseInt(md5(this.props.thread_id).slice(0, 2), 16) % 32;
+    var bgcolor = base_colors[color_index];
 
-    var divstyle = {backgroundColor: bgcolor.toHexString()};
+    var divstyle = {backgroundColor: bgcolor};
 
     var stamp;
     if (this.props.m.time) {
@@ -506,7 +537,7 @@ class Message extends React.Component {
       seen_box = <div className="seen-box" onClick={this.handleMarkUnseen}>✓</div>;
     } else {
       seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}>✓</div>;
-      divstyle.border = "1px solid black";
+      divstyle.border = "2px solid #555";
     }
 
     var byline;
