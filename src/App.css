@@ -182,3 +182,32 @@ td.left-form {
 button.save-transcript {
   margin-right: 1em;
 }
+
+div.seen-box {
+  border: 1px solid #ccc;
+  color: #ccc;
+  height: 1.4em;
+  width: 1.4em;
+  text-align: center;
+  border-radius: 0.3em;
+  margin-right: 0.1em;
+  margin-top: -0.2em;
+  float: right;
+  font-size: 2em;
+  user-select: none;
+  cursor: default;
+}
+
+div.unseen-box {
+  border: 1px solid black;
+  height: 1.4em;
+  width: 1.4em;
+  text-align: center;
+  border-radius: 0.3em;
+  margin-right: 0.1em;
+  margin-top: -0.2em;
+  float: right;
+  font-size: 2em;
+  user-select: none;
+  cursor: default;
+}

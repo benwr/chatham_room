@@ -93,6 +93,7 @@ class Room extends React.Component {
       globally_uncloaked: false,
       chiming: false,
       most_recent_messages: most_recent_messages.slice(0, 3),
+      seen: {},
     };
     this.audio_ctx = new AudioContext();
     this.handleTyping = this.handleTyping.bind(this);
@@ -101,6 +102,8 @@ class Room extends React.Component {
     this.handleReply = this.handleReply.bind(this);
     this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
     this.handleToggleChime = this.handleToggleChime.bind(this);
+    this.handleMarkSeen = this.handleMarkSeen.bind(this);
+    this.handleMarkUnseen = this.handleMarkUnseen.bind(this);
     this.registerMessage = this.registerMessage.bind(this);
     this.saveTranscript = this.saveTranscript.bind(this);
     this.chime = this.chime.bind(this);
@@ -108,14 +111,18 @@ class Room extends React.Component {
 
   componentDidMount() {
     onAuthStateChanged(this.props.auth, (user) => {
-      if (user) {
-        this.setState({"email": user.email});
+      if (!user) {
+        return;
       }
+      this.setState({"email": user.email});
+      var seen_ref;
       var visited_ref;
       if (this.props.room_id) {
         visited_ref = ref(this.props.db, "users/" + user.uid + "/visited/" + this.props.room_id);
+        seen_ref = ref(this.props.db, "users/" + user.uid  + "/seen/" + this.props.room_id)
       } else {
         visited_ref = ref(this.props.db, "users/" + user.uid + "/visited_linkables/" + this.props.linkable_id);
+        seen_ref = ref(this.props.db, "users/" + user.uid  + "/seen_linkables/" + this.props.linkable_id)
       }
       if (this.props.room.emails) {
         set(visited_ref, {
@@ -129,6 +136,10 @@ class Room extends React.Component {
           time: serverTimestamp(),
         });
       }
+      onValue(seen_ref, (snapshot) => {
+        this.setState({seen: snapshot.val()});
+      })
+
     })
   }
 
@@ -201,6 +212,28 @@ class Room extends React.Component {
 
   handleGlobalUncloak(event) {
     this.setState({globally_uncloaked: event.target.checked});
+  }
+
+  handleMarkSeen(thread_id) {
+    var prefix;
+    if (this.props.room_id) {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen/" + this.props.room_id;
+    } else {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen_linkables/" + this.props.linkable_id;
+    }
+
+    set(ref(this.props.db, prefix + "/" + thread_id + "/seen"), true)
+  }
+
+  handleMarkUnseen(thread_id) {
+    var prefix;
+    if (this.props.room_id) {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen/" + this.props.room_id;
+    } else {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen_linkables/" + this.props.linkable_id;
+    }
+
+    set(ref(this.props.db, prefix + "/" + thread_id + "/seen"), false)
   }
 
   chime() {
@@ -281,6 +314,9 @@ class Room extends React.Component {
             globally_uncloaked={this.state.globally_uncloaked}
             registerMessage={this.registerMessage}
             most_recent_messages={this.state.most_recent_messages}
+            seen={this.state.seen ? this.state.seen[k] : undefined}
+            handleMarkSeen={this.handleMarkSeen}
+            handleMarkUnseen={this.handleMarkUnseen}
           />
         );
       }
@@ -408,6 +444,8 @@ class Message extends React.Component {
   constructor(props) {
     super(props);
     this.handleClickReply = this.handleClickReply.bind(this);
+    this.handleMarkSeen = this.handleMarkSeen.bind(this);
+    this.handleMarkUnseen = this.handleMarkUnseen.bind(this);
   }
 
   componentDidMount() {
@@ -417,6 +455,14 @@ class Message extends React.Component {
   handleClickReply(event) {
     event.preventDefault();
     this.props.handleReply(this.props.thread_id);
+  }
+
+  handleMarkSeen(event) {
+    this.props.handleMarkSeen(this.props.thread_id);
+  }
+
+  handleMarkUnseen(event) {
+    this.props.handleMarkUnseen(this.props.thread_id);
   }
 
   render() {
@@ -439,17 +485,26 @@ class Message extends React.Component {
       stamp = <span className="timestamp" />
     }
 
-    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>
+    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>;
+
+
+    const seen = this.props.seen && this.props.seen.seen;
+    var seen_box;
+    if (seen) {
+      seen_box = <div className="seen-box" onClick={this.handleMarkUnseen}>✓</div>;
+    } else {
+      seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}>✓</div>;
+    }
 
     var byline;
     if (this.props.m.author) {
       byline = (<div className="byline">
           {indentation}
           <img alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
-          {this.props.m.author} {stamp}
+          {this.props.m.author}{stamp}{seen_box}
         </div>);
     } else {
-      byline = <div className="byline">{indentation}{stamp}</div>;
+      byline = <div className="byline">{indentation}{stamp}{seen_box}</div>;
     }
     var reply_content;
     if (this.props.depth < MAX_DEPTH) {
@@ -479,6 +534,13 @@ class Message extends React.Component {
 
     if (this.props.m.children) {
       for (const [k, v] of Object.entries(this.props.m.children)) {
+        var child_seen;
+        if (this.props.seen && this.props.seen.children) {
+          child_seen = this.props.seen.children[k]
+        } else {
+          child_seen = undefined
+        }
+
         replies.push(<Message
           m={v}
           depth={this.props.depth + 1}
@@ -492,6 +554,9 @@ class Message extends React.Component {
           globally_uncloaked={this.props.globally_uncloaked}
           registerMessage={this.props.registerMessage}
           most_recent_messages={this.props.most_recent_messages}
+          seen={child_seen}
+          handleMarkSeen={this.props.handleMarkSeen}
+          handleMarkUnseen={this.props.handleMarkUnseen}
         />);
       }
     }
