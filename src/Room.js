@@ -40,7 +40,7 @@ const base_colors = [
   "#cceeff",
   "#ffbbff",
   "#dddddd",
-].map(c => tinycolor(c).lighten(1))
+].map(c => tinycolor(c).lighten(2.2))
 
 class RoomContainerRouted extends React.Component {
   state = {};
