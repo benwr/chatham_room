@@ -36,6 +36,7 @@ nav a:hover {
   padding-left: 0.4em;
   padding-bottom: 0.2em;
   padding-top: 0.4em;
+  padding-right: 0.6em;
   margin: 0.2em;
   margin-right: 1px;
   padding-right: 0;
@@ -199,13 +200,15 @@ div.seen-box {
 }
 
 div.unseen-box {
-  border: 1px solid black;
+  border: 2px solid #333;
   height: 1.4em;
   width: 1.4em;
   text-align: center;
   border-radius: 0.3em;
   margin-right: 0.1em;
   margin-top: -0.2em;
+  margin-left: 1em;
+  margin-bottom: 1em;
   float: right;
   font-size: 2em;
   user-select: none;

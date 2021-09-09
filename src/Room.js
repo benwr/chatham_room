@@ -7,7 +7,6 @@ import { withRouter } from "react-router-dom";
 import tinycolor from "tinycolor2";
 
 const base_colors = [
-  "#ffffff",
   "#ffffee",
   "#ffeeff",
   "#eeffff",
@@ -26,7 +25,6 @@ const base_colors = [
   "#ffffcc",
   "#ffccff",
   "#ccffff",
-  "#eeeeee",
   "#ffdddd",
   "#ddffdd",
   "#ddddff",
@@ -39,7 +37,9 @@ const base_colors = [
   "#eeccff",
   "#ccffee",
   "#cceeff",
-].map(c => tinycolor(c).lighten(3))
+  "#ffbbff",
+  "#dddddd",
+].map(c => tinycolor(c).lighten(1))
 
 class RoomContainerRouted extends React.Component {
   state = {};
@@ -180,9 +180,6 @@ class Room extends React.Component {
   }
 
   componentDidUpdate() {
-    if (document.activeElement.tagName === "TEXTAREA") {
-      document.activeElement.scrollIntoView({block: "center", behavior: "smooth"});
-    }
   }
 
   handleTyping(thread_id, content) {
@@ -290,6 +287,9 @@ class Room extends React.Component {
     const mrm = this.state.most_recent_messages;
     if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(id)) {
       return;
+    }
+    if (document.activeElement.tagName === "TEXTAREA") {
+      document.activeElement.scrollIntoView({block: "center", behavior: "smooth"});
     }
     var new_most_recent = mrm.concat([[stamp, id]])
     new_most_recent.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
@@ -504,7 +504,7 @@ class Message extends React.Component {
   }
 
   render() {
-    const color_index = parseInt(md5(this.props.thread_id).slice(0, 2), 16) % 32;
+    const color_index = parseInt(md5(this.props.thread_id).slice(0, 4), 16) % base_colors.length;
     var bgcolor = base_colors[color_index];
 
     var divstyle = {backgroundColor: bgcolor};
@@ -516,7 +516,7 @@ class Message extends React.Component {
       var time = dt.toLocaleTimeString();
       const stamp_style = {};
       const mrm = this.props.most_recent_messages;
-      if (mrm && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
+      if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
         stamp_style.fontWeight = "bold";
         stamp_style.color = "#000";
         time += " (new)";
@@ -536,8 +536,8 @@ class Message extends React.Component {
     if (seen) {
       seen_box = <div className="seen-box" onClick={this.handleMarkUnseen}>✓</div>;
     } else {
-      seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}>✓</div>;
-      divstyle.border = "2px solid #555";
+      seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}> </div>;
+      divstyle.border = "2px solid #333";
     }
 
     var byline;
