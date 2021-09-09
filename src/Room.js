@@ -4,6 +4,43 @@ import React from "react";
 import md5 from "md5";
 import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
+import tinycolor from "tinycolor2";
+import moment from "moment";
+
+const base_colors = [
+  "#ffffee",
+  "#ffeeff",
+  "#eeffff",
+  "#ffeeee",
+  "#eeffee",
+  "#eeeeff",
+  "#ffffdd",
+  "#ffddff",
+  "#ddffff",
+  "#ffeedd",
+  "#ffddee",
+  "#eeffdd",
+  "#eeddff",
+  "#ddffee",
+  "#ddeeff",
+  "#ffffcc",
+  "#ffccff",
+  "#ccffff",
+  "#ffdddd",
+  "#ddffdd",
+  "#ddddff",
+  "#ffffbb",
+  "#ccccff",
+  "#bbffff",
+  "#ffeecc",
+  "#ffccee",
+  "#eeffcc",
+  "#eeccff",
+  "#ccffee",
+  "#cceeff",
+  "#ffbbff",
+  "#dddddd",
+].map(c => tinycolor(c).lighten(1))
 
 class RoomContainerRouted extends React.Component {
   state = {};
@@ -93,6 +130,7 @@ class Room extends React.Component {
       globally_uncloaked: false,
       chiming: false,
       most_recent_messages: most_recent_messages.slice(0, 3),
+      seen: {},
     };
     this.audio_ctx = new AudioContext();
     this.handleTyping = this.handleTyping.bind(this);
@@ -101,6 +139,8 @@ class Room extends React.Component {
     this.handleReply = this.handleReply.bind(this);
     this.handleGlobalUncloak = this.handleGlobalUncloak.bind(this);
     this.handleToggleChime = this.handleToggleChime.bind(this);
+    this.handleMarkSeen = this.handleMarkSeen.bind(this);
+    this.handleMarkUnseen = this.handleMarkUnseen.bind(this);
     this.registerMessage = this.registerMessage.bind(this);
     this.saveTranscript = this.saveTranscript.bind(this);
     this.chime = this.chime.bind(this);
@@ -108,14 +148,18 @@ class Room extends React.Component {
 
   componentDidMount() {
     onAuthStateChanged(this.props.auth, (user) => {
-      if (user) {
-        this.setState({"email": user.email});
+      if (!user) {
+        return;
       }
+      this.setState({"email": user.email});
+      var seen_ref;
       var visited_ref;
       if (this.props.room_id) {
         visited_ref = ref(this.props.db, "users/" + user.uid + "/visited/" + this.props.room_id);
+        seen_ref = ref(this.props.db, "users/" + user.uid  + "/seen/" + this.props.room_id)
       } else {
         visited_ref = ref(this.props.db, "users/" + user.uid + "/visited_linkables/" + this.props.linkable_id);
+        seen_ref = ref(this.props.db, "users/" + user.uid  + "/seen_linkables/" + this.props.linkable_id)
       }
       if (this.props.room.emails) {
         set(visited_ref, {
@@ -129,13 +173,14 @@ class Room extends React.Component {
           time: serverTimestamp(),
         });
       }
+      onValue(seen_ref, (snapshot) => {
+        this.setState({seen: snapshot.val()});
+      })
+
     })
   }
 
   componentDidUpdate() {
-    if (document.activeElement.tagName === "TEXTAREA") {
-      document.activeElement.scrollIntoView({block: "center", behavior: "smooth"});
-    }
   }
 
   handleTyping(thread_id, content) {
@@ -203,6 +248,28 @@ class Room extends React.Component {
     this.setState({globally_uncloaked: event.target.checked});
   }
 
+  handleMarkSeen(thread_id) {
+    var prefix;
+    if (this.props.room_id) {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen/" + this.props.room_id;
+    } else {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen_linkables/" + this.props.linkable_id;
+    }
+
+    set(ref(this.props.db, prefix + "/" + thread_id + "/seen"), true)
+  }
+
+  handleMarkUnseen(thread_id) {
+    var prefix;
+    if (this.props.room_id) {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen/" + this.props.room_id;
+    } else {
+      prefix = "/users/" + this.props.auth.currentUser.uid + "/seen_linkables/" + this.props.linkable_id;
+    }
+
+    set(ref(this.props.db, prefix + "/" + thread_id + "/seen"), false)
+  }
+
   chime() {
     const length = 300;
     var osc = this.audio_ctx.createOscillator();
@@ -221,6 +288,9 @@ class Room extends React.Component {
     const mrm = this.state.most_recent_messages;
     if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(id)) {
       return;
+    }
+    if (document.activeElement.tagName === "TEXTAREA") {
+      document.activeElement.scrollIntoView({block: "center", behavior: "smooth"});
     }
     var new_most_recent = mrm.concat([[stamp, id]])
     new_most_recent.sort((e1, e2) => {return e2[0].getTime() - e1[0].getTime()});
@@ -264,12 +334,15 @@ class Room extends React.Component {
 
   render() {
     let messages = [];
+    var i = 0;
 
     if (this.props.room.messages) {
       for (const [k, v] of Object.entries(this.props.room.messages)) {
+        i += 1;
         messages.push(
           <Message
             m={v}
+            toplevel_index={i}
             depth={1}
             key={k}
             thread_id={k}
@@ -281,6 +354,9 @@ class Room extends React.Component {
             globally_uncloaked={this.state.globally_uncloaked}
             registerMessage={this.registerMessage}
             most_recent_messages={this.state.most_recent_messages}
+            seen={this.state.seen ? this.state.seen[k] : undefined}
+            handleMarkSeen={this.handleMarkSeen}
+            handleMarkUnseen={this.handleMarkUnseen}
           />
         );
       }
@@ -352,7 +428,6 @@ class ReplyForm extends React.Component {
   }
 
   componentDidUpdate() {
-    // this.inputref.scrollIntoView({block: "center", behavior: "smooth"});
   }
 
   handleChange(event) {
@@ -408,6 +483,8 @@ class Message extends React.Component {
   constructor(props) {
     super(props);
     this.handleClickReply = this.handleClickReply.bind(this);
+    this.handleMarkSeen = this.handleMarkSeen.bind(this);
+    this.handleMarkUnseen = this.handleMarkUnseen.bind(this);
   }
 
   componentDidMount() {
@@ -419,37 +496,60 @@ class Message extends React.Component {
     this.props.handleReply(this.props.thread_id);
   }
 
+  handleMarkSeen(event) {
+    this.props.handleMarkSeen(this.props.thread_id);
+  }
+
+  handleMarkUnseen(event) {
+    this.props.handleMarkUnseen(this.props.thread_id);
+  }
+
   render() {
+    const color_index = parseInt(md5(this.props.thread_id).slice(0, 4), 16) % base_colors.length;
+    var bgcolor = base_colors[color_index];
+
+    var divstyle = {backgroundColor: bgcolor};
+
     var stamp;
     if (this.props.m.time) {
-      const dt = new Date(this.props.m.time);
-      const date = dt.toDateString();
-      var time = dt.toLocaleTimeString();
+      const dt = new moment(this.props.m.time);
+      // const date = dt.toDateString();
+      // var time = dt.toLocaleTimeString();
       const stamp_style = {};
       const mrm = this.props.most_recent_messages;
       if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
         stamp_style.fontWeight = "bold";
         stamp_style.color = "#000";
-        time += " (new)";
+        // time += " (new)";
       }
       stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} style={stamp_style} className="timestamp">
-        {"@ " + date + " " + time}
+        {" " + dt.fromNow()}
       </a>);
     } else {
       stamp = <span className="timestamp" />
     }
 
-    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>
+    const indentation = <span className="invisible-indent">{"\u00A0\u00A0".repeat(this.props.depth - 1)}</span>;
+
+
+    const seen = this.props.seen && this.props.seen.seen;
+    var seen_box;
+    if (seen) {
+      seen_box = <div className="seen-box" onClick={this.handleMarkUnseen}>✓</div>;
+    } else {
+      seen_box = <div className="unseen-box" onMouseEnter={this.handleMarkSeen} onClick={this.handleMarkSeen}> </div>;
+      divstyle.border = "2px solid #333";
+    }
 
     var byline;
     if (this.props.m.author) {
       byline = (<div className="byline">
           {indentation}
           <img alt={""} className="avatar" src={"https://www.gravatar.com/avatar/" + md5(this.props.m.author) + "?d=retro"} />
-          {this.props.m.author} {stamp}
+          {this.props.m.author}{stamp}{seen_box}
         </div>);
     } else {
-      byline = <div className="byline">{indentation}{stamp}</div>;
+      byline = <div className="byline">{indentation}{stamp}{seen_box}</div>;
     }
     var reply_content;
     if (this.props.depth < MAX_DEPTH) {
@@ -479,6 +579,13 @@ class Message extends React.Component {
 
     if (this.props.m.children) {
       for (const [k, v] of Object.entries(this.props.m.children)) {
+        var child_seen;
+        if (this.props.seen && this.props.seen.children) {
+          child_seen = this.props.seen.children[k]
+        } else {
+          child_seen = undefined
+        }
+
         replies.push(<Message
           m={v}
           depth={this.props.depth + 1}
@@ -492,6 +599,10 @@ class Message extends React.Component {
           globally_uncloaked={this.props.globally_uncloaked}
           registerMessage={this.props.registerMessage}
           most_recent_messages={this.props.most_recent_messages}
+          seen={child_seen}
+          handleMarkSeen={this.props.handleMarkSeen}
+          handleMarkUnseen={this.props.handleMarkUnseen}
+          toplevel_index={this.props.toplevel_index}
         />);
       }
     }
@@ -499,7 +610,7 @@ class Message extends React.Component {
 
     var content_lines = this.props.m.content.split("\n").flatMap((e, i) => [<br key={i} />, indentation, e]).slice(1);
 
-    return <div className="message">
+    return <div style={divstyle} className="message">
       {byline}
       {content_lines}
       <br />
