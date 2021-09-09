@@ -5,6 +5,7 @@ import md5 from "md5";
 import TextareaAutosize from "react-textarea-autosize";
 import { withRouter } from "react-router-dom";
 import tinycolor from "tinycolor2";
+import moment from "moment";
 
 const base_colors = [
   "#ffffee",
@@ -511,18 +512,18 @@ class Message extends React.Component {
 
     var stamp;
     if (this.props.m.time) {
-      const dt = new Date(this.props.m.time);
-      const date = dt.toDateString();
-      var time = dt.toLocaleTimeString();
+      const dt = new moment(this.props.m.time);
+      // const date = dt.toDateString();
+      // var time = dt.toLocaleTimeString();
       const stamp_style = {};
       const mrm = this.props.most_recent_messages;
       if (mrm.length > 2 && [mrm[0][1], mrm[1][1], mrm[2][1]].includes(this.props.thread_id)) {
         stamp_style.fontWeight = "bold";
         stamp_style.color = "#000";
-        time += " (new)";
+        // time += " (new)";
       }
       stamp = (<a href={"#" + this.props.thread_id} id={this.props.thread_id} style={stamp_style} className="timestamp">
-        {"@ " + date + " " + time}
+        {" " + dt.fromNow()}
       </a>);
     } else {
       stamp = <span className="timestamp" />
